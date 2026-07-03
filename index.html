@@ -73,10 +73,10 @@ button{font-family:var(--pixel-font);text-transform:uppercase}
 /* Board container — smooth opacity transition to reduce flash */
 #boardbrd{transition:opacity .08s;contain:layout}
 
-/* Board grid */
-.brd{display:flex;flex-direction:column;gap:2px;align-items:center;}
-.brd-r{display:flex;align-items:center;gap:2px;}
-.ri{width:18px;text-align:center;font-size:8px;color:#4a4a66;flex-shrink:0}
+/* Board grid — 让棋盘格居中，左侧小字绝对定位避免被遮挡 */
+.brd{display:flex;flex-direction:column;gap:2px;align-items:center;position:relative;}
+.brd-r{display:flex;align-items:center;justify-content:center;gap:2px;width:318px;position:relative;}
+.ri{position:absolute;left:-20px;width:18px;text-align:center;font-size:8px;color:#4a4a66;}
 .ri.d{color:#ff4444}
 
 .cell{
@@ -90,7 +90,12 @@ button{font-family:var(--pixel-font);text-transform:uppercase}
 .cell.drag-over{border-color:#ffcc00!important;box-shadow:inset 0 0 0 2px #ffcc00;background:#2a1a44;}
 .cell.drag-move{border-color:#44cc88!important;box-shadow:inset 0 0 0 2px #44cc88;background:#1a2a2a;}
 
-.sep{height:4px;background:#2a2a44;margin:2px 0;width:100%;}
+.sep{height:4px;background:#2a2a44;margin:2px 0;width:100%;transition:background .2s,box-shadow .2s;box-shadow:0 0 0 rgba(255,50,50,0);}
+.sep.danger{animation:sepFlash .5s infinite alternate;}
+@keyframes sepFlash{
+  from{background:#2a2a44;box-shadow:0 0 6px rgba(255,50,50,0);}
+  to{background:#cc3333;box-shadow:0 0 14px rgba(255,50,50,.8);}
+}
 
 .fm{font-size:28px;line-height:1;pointer-events:none;transition:transform .15s}
 .fv{
@@ -593,7 +598,8 @@ function renderBoard(){
     for(let c=0;c<COLS;c++)h+=cellHtml(r,c);
     h+=`</div>`;
   }
-  h+=`</div><div class="sep"></div><div class="sl">${pxText('FLOWER FIELD','px-section')}</div><div class="brd">`;
+  const dangerRow=G.monsters.some(m=>m.row===P_ROWS-1);
+  h+=`</div><div class="sep${dangerRow?' danger':''}"></div><div class="sl">${pxText('FLOWER FIELD','px-section')}</div><div class="brd">`;
   for(let r=P_ROWS;r<TOTAL_ROWS;r++){
     h+=`<div class="brd-r"><div class="ri">DF${r-P_ROWS+1}</div>`;
     for(let c=0;c<COLS;c++)h+=cellHtml(r,c);
