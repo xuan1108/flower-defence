@@ -334,8 +334,7 @@ button{font-family:var(--pixel-font);text-transform:uppercase}
       <div class="ss-rule-line"><b>⚔️ 攻击：</b><span>花朵自动攻击同列怪兽</span></div>
       <div class="ss-rule-line"><b>🔄 拖拽：</b><span>同级花合并升级</span></div>
       <div class="ss-rule-line sub"><span>异级花交换位置</span></div>
-      <div class="ss-rule-line sub"><span>拖移到空格放置</span></div>
-      <div class="ss-rule-line"><b>📦 工具箱：</b><span>拾取花朵可拖放到防御区</span></div>
+      <div class="ss-rule-line"><b>📦 工具箱：</b><span>暂时放置花朵 要及时移出！</span></div>
     </div>
     <div class="ss-demo">
       <div class="demo-title">玩法演示</div>
@@ -405,21 +404,21 @@ const mhpLv=(l,kill)=>{
   if(l<=20)return Math.floor(l*5.5)+rand(0,Math.floor(l*3));     // LV15:82~127  LV20:110~170
   return Math.floor(l*7)+rand(0,Math.floor(l*4));                // 超后期略微加速
 };
-// 掉落花：级别越高频率越低，1级花贯穿全程——取舍是策略核心
+// 掉落花：最高16级且极其罕见，1级花贯穿全程——取舍是策略核心
 // kill 用于早期波形控制，l 用于中后期关卡推进
 const mdropLv=(l,kill)=>{
   // 前3~4波：只有1级花，2级花最早第4波后出现
   if(kill<=3)return 1;
   if(kill<=8)return pick([1,1,1,2]);              // 25%出2级
   if(kill<=16)return pick([1,1,2,2]);             // 50%出2级
-  if(kill<=30)return pick([1,1,2,2,2,4]);         // 33%1级,50%2级,17%4级
-  // 中后期：高等级渐出但始终保持 1级>2级>4级>8级>... 的稀有梯度
+  if(kill<=30)return pick([1,1,2,2,2,4]);         // 17%4级
+  // 中后期：高等级渐出，16级仅在高等级极其罕见出现
   if(l<=5)return pick([1,1,2,2,2,4,4]);           // 29%1级,43%2级,29%4级
   if(l<=10)return pick([1,1,2,2,4,4,8]);          // 29%1级,29%2级,29%4级,14%8级
   if(l<=15)return pick([1,1,2,4,4,8,8]);          // 29%1级,14%2级,29%4级,29%8级
-  if(l<=25)return pick([1,1,2,4,8,8,16]);         // 29%1级,14%2级,14%4级,29%8级,14%16级
-  if(l<=40)return pick([1,1,2,4,8,8,16,16]);      // 25%1级,12%2级,12%4级,25%8级,25%16级
-  return pick([1,2,4,8,8,16,16,32]);               // 12%1级,12%2级,12%4级,25%8级,25%16级,12%32级
+  if(l<=25)return pick([1,1,2,2,4,4,8,8]);        // 无16
+  if(l<=40)return pick([1,1,1,2,2,4,4,8,8,8,16]); // ~9%16级 (极其罕见)
+  return pick([1,1,1,2,2,4,4,8,8,8,16]);           // ~8%16级 (极其罕见)
 };
 // ★ 掉落率逐步递减：前期高（教学友好），中后期保持40%底线避免拿不到花
 function cmLv(lv,c,row,kill){
@@ -449,10 +448,11 @@ function init(){
   G.flowers=[];G.monsters=[];G.toolbox=null;G.score=0;G.level=1;G.go=false;
   G.dying=[];G.tbSel=false;
   G.spawnCount=0; G.turnSinceSpawn=0; G.killCount=0; G.prevLevel=1;
-  // 随机位置放一朵1级花
-  const initR=rand(P_ROWS,P_ROWS+1);
-  const initC=rand(0,4);
-  G.flowers.push({r:initR,c:initC,v:1});
+  // 开局放2朵1级花在不同列，确保新手有基本防守面
+  const c1=rand(0,2);
+  const c2=rand(3,4); // 保证不同列
+  G.flowers.push({r:rand(P_ROWS,P_ROWS+1),c:c1,v:1});
+  G.flowers.push({r:rand(P_ROWS,P_ROWS+1),c:c2,v:1});
   spawnMonsters(); renderAll();
 }
 // ★ 击杀数驱动难度：前3~4击杀简单，之后逐渐加压
@@ -467,8 +467,15 @@ function spawnMonsters(){
   let cnt=k<=3?1:k<=6?rand(1,2):k<=10?rand(1,3):k<=15?rand(2,3):k<=22?rand(2,4):k<=40?rand(3,4):rand(3,5);
   cnt=Math.min(cnt,cap-total);
   const usedCols=new Set(G.monsters.filter(m=>m.row===0).map(m=>m.col));
-  const freeCols=[0,1,2,3,4].filter(c=>!usedCols.has(c));
-  const cols=shuffle(freeCols.length?freeCols:[0,1,2,3,4]).slice(0,cnt);
+  let freeCols=[0,1,2,3,4].filter(c=>!usedCols.has(c));
+  // ★ 新手保护：前3只怪兽优先出现在有花防守的列，保证玩家能学会攻击循环
+  if(k<=2&&freeCols.length){
+    const defendedCols=freeCols.filter(c=>G.flowers.some(f=>f.c===c));
+    if(defendedCols.length) freeCols=defendedCols;
+  }
+  if(!freeCols.length) freeCols=[0,1,2,3,4].filter(c=>!usedCols.has(c));
+  if(!freeCols.length) freeCols=[0,1,2,3,4]; // fallback
+  const cols=shuffle(freeCols).slice(0,cnt);
   // 击杀8+ 怪兽可能从 row1 出现，贴脸施压；LV5+ 可能同时从 row1 和 row0
   // ★ 用户要求：所有怪兽必须从 monster path 第一行 (row=0) 出现
   for(const c of cols)G.monsters.push(cmLv(G.level,c,0,k));
