@@ -29,12 +29,12 @@ button{font-family:var(--pixel-font);text-transform:uppercase}
 .px-dot{width:var(--px-unit,3px);height:var(--px-unit,3px)}
 .px-on{background:var(--px-color,#c084fc);box-shadow:var(--px-shadow,1px 0 0 #5a3f7c,0 1px 0 #5a3f7c)}
 .px-title{--px-unit:3px;--px-color:#f3e8ff;--px-shadow:0 0 6px rgba(192,132,252,.75),1px 0 0 #c084fc,0 1px 0 #c084fc,2px 0 0 #5a3f7c,0 2px 0 #5a3f7c;justify-content:center;flex-wrap:wrap}
-.px-ui{--px-unit:1.5px;--px-color:#aaa6cc;--px-shadow:1px 0 0 #4a3a66,0 1px 0 #4a3a66}
+.px-ui{--px-unit:1.8px;--px-color:#aaa6cc;--px-shadow:1px 0 0 #4a3a66,0 1px 0 #4a3a66}
 .px-purple{--px-color:#c084fc;--px-shadow:1px 0 0 #5a3f7c,0 1px 0 #5a3f7c}
 .px-button{--px-unit:2px;--px-color:#c084fc;--px-shadow:1px 0 0 #5a3f7c,0 1px 0 #5a3f7c}
 .px-score{--px-unit:3px;--px-color:#ffcc00;--px-shadow:1px 0 0 #886600,0 1px 0 #886600}
-.px-level{--px-unit:2px;--px-color:#c084fc;--px-shadow:1px 0 0 #5a3f7c,0 1px 0 #5a3f7c}
-.px-section{--px-unit:1.5px;--px-color:#777186;--px-shadow:1px 0 0 #2a2340,0 1px 0 #2a2340}
+.px-level{--px-unit:1.5px;--px-color:#c084fc;--px-shadow:1px 0 0 #5a3f7c,0 1px 0 #5a3f7c}
+.px-section{--px-unit:1.2px;--px-color:#777186;--px-shadow:1px 0 0 #2a2340,0 1px 0 #2a2340}
 .px-pause-title{--px-unit:2.5px;--px-color:#c084fc;--px-shadow:1px 0 0 #5a3f7c,0 1px 0 #5a3f7c}
 .px-pause-button{--px-unit:1.75px;--px-color:#c084fc;--px-shadow:1px 0 0 #5a3f7c,0 1px 0 #5a3f7c}
 .px-game-title{--px-unit:2.5px;--px-color:#ff4444;--px-shadow:1px 0 0 #5a1f35,0 1px 0 #5a1f35}
@@ -42,21 +42,20 @@ button{font-family:var(--pixel-font);text-transform:uppercase}
 .px-game-sub{--px-unit:2px;--px-color:#c084fc;--px-shadow:1px 0 0 #5a3f7c,0 1px 0 #5a3f7c}
 
 /* Top bar */
-#topbar{display:flex;justify-content:space-between;align-items:center;padding:0 0 5px;border-bottom:2px solid #3a3a5c;width:calc(var(--cell-size)*5 + var(--gap)*4);margin:0 auto;}
-.sc-l{
-  min-height:11px;
-}
-.sc-v{
-  min-height:21px;margin-top:5px;
-}
-.top-r{display:flex;gap:6px;align-items:center}
+#topbar{display:flex;justify-content:space-between;align-items:flex-end;padding:0 0 5px;border-bottom:2px solid #3a3a5c;width:calc(var(--cell-size)*5 + var(--gap)*4);margin:0 auto;}
+.top-l{display:flex;flex-direction:column;gap:0px;}
+.sc-row{display:flex;align-items:flex-end;gap:4px;}
+.sc-l,.bdg{width:60px;}
+.sc-l{min-height:11px;}
+.sc-v{min-height:21px;}
 .bdg{
-  background:#2a2a44;border:2px solid #5a4a7a;padding:4px 8px;
-  border-radius:2px;min-width:46px;min-height:23px;display:flex;align-items:center;justify-content:center;
+  background:#2a2a44;border:2px solid #5a4a7a;padding:2px 0;
+  border-radius:2px;min-height:20px;display:flex;align-items:center;justify-content:center;
 }
+#pauseBtn{align-self:flex-end;margin-bottom:-2px;}
 /* Toolbox row */
 .tbrow{
-  display:flex;align-items:flex-start;justify-content:space-between;
+  display:flex;align-items:flex-start;justify-content:flex-start;
   width:calc(var(--cell-size)*5 + var(--gap)*4);
   margin:0 auto;gap:var(--gap);position:relative;
   padding-top:2px;
@@ -77,23 +76,26 @@ button{font-family:var(--pixel-font);text-transform:uppercase}
   display:flex;align-items:center;justify-content:center;
   font-size:8px;color:#777186;letter-spacing:2px;
 }
-/* Pause button — circle with two bars, no emoji */
 #pauseBtn{
-  width:44px;height:44px;border-radius:50%;flex-shrink:0;
-  background:rgba(20,20,40,.88);border:2px solid #5a4a7a;
+  width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  background:rgba(20,20,40,.88);border:1.5px solid #5a4a7a;
   cursor:pointer;display:flex;align-items:center;justify-content:center;
-  transition:all .2s;box-shadow:0 2px 12px rgba(0,0,0,.5);
+  transition:all .2s;box-shadow:0 1px 6px rgba(0,0,0,.5);
   position:relative;
 }
 #pauseBtn:hover{background:#2a1a4a;border-color:#a78bfa;transform:scale(1.08)}
 #pauseBtn:active{background:#3a1a5a;transform:scale(.94)}
-#pauseBtn .pbars,
-#pauseBtn .pbars::after{
-  width:4px;height:14px;background:#a78bfa;border-radius:1px;
-  display:block;content:'';
+#pauseBtn .pbars{
+  display:flex;align-items:center;justify-content:center;gap:3px;
+  width:100%;height:100%;
 }
-#pauseBtn .pbars{position:relative;margin-right:5px;}
-#pauseBtn .pbars::after{position:absolute;left:7px;top:0;}
+#pauseBtn .pbars::before,
+#pauseBtn .pbars::after{
+  content:'';
+  display:block;
+  width:2px;height:8px;background:#a78bfa;border-radius:0.5px;
+  flex-shrink:0;
+}
 
 /* Section labels */
 .sl{
@@ -352,7 +354,7 @@ button{font-family:var(--pixel-font);text-transform:uppercase}
 
 /* Mobile: fit whole game on one screen */
 @media (max-width:430px){
-  :root{--cell-size:48px;}
+  :root{--cell-size:54px;--gap:2px;}
   .ss-box{width:calc(100% - 24px);max-width:360px;padding:24px 16px;}
   .ss-title{font-size:24px;letter-spacing:1px;}
   .ss-icons{font-size:20px;}
@@ -360,19 +362,30 @@ button{font-family:var(--pixel-font);text-transform:uppercase}
   #app{padding:8px;gap:2px;}
   #topbar{padding:0 0 3px;}
   .sl{margin:2px 0;}
+  .px-section{--px-unit:1.2px;}
   .fm{font-size:24px;}
   .mm{font-size:24px;}
-  .tbs{width:44px;height:44px;}
-  .tbs .fm{font-size:20px;}
-  #pauseBtn{width:40px;height:40px;}
-  #pauseBtn .pbars,#pauseBtn .pbars::after{width:3px;height:12px;}
-  #pauseBtn .pbars{margin-right:4px;}
-  #pauseBtn .pbars::after{left:6px;}
+  .tbs{width:var(--cell-size);height:var(--cell-size);}
+  .tbs .fm{font-size:22px;}
+  .tbs .fv{font-size:9px;}
+  #pauseBtn{width:20px;height:20px;border-width:1px;}
+  #pauseBtn .pbars::before,
+  #pauseBtn .pbars::after{width:1.5px;height:7px;}
+  #pauseBtn .pbars{gap:2px;}
   .tbrow{padding-top:1px;}
   #toolbox .tbl{font-size:7px;letter-spacing:1px;}
+  .sc-l,.bdg{width:52px;}
+  .bdg{min-height:21px;}
+}
+@media (max-height:700px){
+  :root{--cell-size:48px;--gap:1px;}
+  .ss-box{padding:18px 14px;gap:10px;}
+  .ss-demo{display:none;}
+  .sl{margin:1px 0;}
+  #toolbox{padding:4px 0;}
 }
 @media (max-height:600px){
-  :root{--cell-size:40px;}
+  :root{--cell-size:42px;}
 }
 </style>
 </head>
@@ -424,7 +437,6 @@ button{font-family:var(--pixel-font);text-transform:uppercase}
   <div id="boardbrd"><div id="board"></div></div>
   <div class="tbrow">
     <div id="toolbox"></div>
-    <button id="pauseBtn" title="Pause"><span class="pbars"></span></button>
   </div>
 </div>
 <div id="ghost"><span class="fm"></span><span class="fv"></span></div>
@@ -484,7 +496,7 @@ const mdropLv=(l,kill)=>{
 // ★ 掉落率逐步递减：前期高（教学友好），中后期保持40%底线避免拿不到花
 function cmLv(lv,c,row,kill){
   const h=mhpLv(lv,kill), dv=mdropLv(lv,kill);
-  const dropRate=kill<=3?0.9:kill<=8?0.75:kill<=20?0.6:kill<=35?0.5:kill<=60?0.42:0.38;
+  const dropRate=kill<=3?0.9:kill<=8?0.75:kill<=20?0.6:kill<=35?0.5:kill<=60?0.48:lv>=16?0.45:0.38;
   const hasDrop=Math.random()<dropRate;
   return{id:Date.now()+Math.random(),e:pick(MTPS),hp:h,mh:h,col:c,row:row||0,dv:hasDrop?dv:0,de:hasDrop?fe(dv):''};
 }
@@ -636,8 +648,8 @@ $('btnlb').addEventListener('click',openLB);
 $('btnlb').addEventListener('touchstart',e=>{e.preventDefault();openLB();},{passive:false});
 
 function renderTopbar(){
-  $('topbar').innerHTML=`<div><div class="sc-l">${pxText('SCORE','px-ui')}</div><div class="sc-v">${pxText(G.score,'px-score')}</div></div>
-    <div class="top-r"><div class="bdg">${pxText('LV '+G.level,'px-level')}</div></div>`;
+  $('topbar').innerHTML=`<div class="top-l"><div class="bdg">${pxText('LV '+G.level,'px-level')}</div><div class="sc-row"><div class="sc-l">${pxText('SCORE','px-ui')}</div><div class="sc-v">${pxText(G.score,'px-score')}</div></div></div>
+    <button id="pauseBtn" title="Pause"><span class="pbars"></span></button>`;
 }
 function cellHtml(r,c){
   const fl=G.flowers.find(f=>f.r===r&&f.c===c);
