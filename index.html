@@ -354,35 +354,33 @@ button{font-family:var(--pixel-font);text-transform:uppercase}
 
 /* Mobile: fit whole game on one screen */
 @media (max-width:450px){
-  :root{--cell-size:62px;--gap:2px;}
-  .ss-box{width:calc(100% - 16px);max-width:380px;padding:20px 12px;}
-  .ss-title{font-size:24px;letter-spacing:1px;}
-  .ss-icons{font-size:20px;}
-  .ss-rules{font-size:10px;}
+  :root{--cell-size:66px;--gap:2px;}
+  .ss-box{width:calc(100% - 40px);max-width:360px;padding:24px 20px;}
+  .ss-title{font-size:22px;letter-spacing:1px;}
+  .ss-icons{font-size:18px;}
+  .ss-rules{font-size:9px;}
   #app{padding:4px;gap:2px;}
   #topbar{padding:0 0 3px;}
-  /* SCORE/LV 字体缩小 */
-  .px-ui{--px-unit:1.1px;}
-  .px-level{--px-unit:0.9px;}
-  .sl{margin:2px 0;}
+  /* 字体与桌面一致，不缩小 */
+  .sl{margin:1px 0;}
   .px-section{--px-unit:1.1px;}
-  /* 等级卡紧贴 SCORE */
-  .top-l{gap:-12px;}
-  .bdg{min-height:14px;padding:0 0;border-width:1px;}
+  /* 等级卡与SCORE同宽对齐，间距紧凑 */
+  .top-l{gap:0px;}
+  .bdg{margin-bottom:-6px;min-height:18px;padding:2px 0;border-width:2px;}
+  .sc-l,.bdg{width:60px;}
   .sc-row{gap:6px;}
   .fm{font-size:26px;}
   .mm{font-size:26px;}
   .tbs{width:var(--cell-size);height:var(--cell-size);}
   .tbs .fm{font-size:24px;}
   .tbs .fv{font-size:9px;}
-  /* 暂停按钮 = SCORE 字体大小（约13px）*/
-  #pauseBtn{width:14px;height:14px;border-width:1px;margin-bottom:-1px;}
+  /* 暂停按钮稍大 */
+  #pauseBtn{width:26px;height:26px;border-width:2px;margin-bottom:-2px;}
   #pauseBtn .pbars::before,
-  #pauseBtn .pbars::after{width:1.5px;height:5px;}
-  #pauseBtn .pbars{gap:2px;}
+  #pauseBtn .pbars::after{width:3px;height:10px;}
+  #pauseBtn .pbars{gap:4px;}
   .tbrow{padding-top:1px;}
   #toolbox .tbl{font-size:7px;letter-spacing:1px;}
-  .sc-l,.bdg{width:52px;}
 }
 @media (max-height:700px){
   :root{--cell-size:55px;--gap:1px;}
