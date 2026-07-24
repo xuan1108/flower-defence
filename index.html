@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>FLOWER DEFENCE</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -40,6 +41,9 @@ button{font-family:var(--pixel-font);text-transform:uppercase}
 .px-game-title{--px-unit:2.5px;--px-color:#ff4444;--px-shadow:1px 0 0 #5a1f35,0 1px 0 #5a1f35}
 .px-game-score{--px-unit:2.5px;--px-color:#ffcc00;--px-shadow:1px 0 0 #886600,0 1px 0 #886600}
 .px-game-sub{--px-unit:2px;--px-color:#c084fc;--px-shadow:1px 0 0 #5a3f7c,0 1px 0 #5a3f7c}
+.px-rank{--px-unit:2px;--px-color:#ffcc00;--px-shadow:1px 0 0 #886600,0 1px 0 #886600}
+.px-go-info{--px-unit:1.5px;--px-color:#e9d5ff;--px-shadow:1px 0 0 #8b5cf6,0 1px 0 #8b5cf6}
+.px-go-prompt{--px-unit:2px;--px-color:#ffcc00;--px-shadow:1px 0 0 #886600,0 1px 0 #886600}
 
 /* Top bar */
 #topbar{display:flex;justify-content:space-between;align-items:flex-end;padding:0 0 5px;border-bottom:2px solid #3a3a5c;width:calc(var(--cell-size)*5 + var(--gap)*4);margin:0 auto;}
@@ -220,13 +224,106 @@ button{font-family:var(--pixel-font);text-transform:uppercase}
 .gt{min-height:18px;margin-bottom:4px}
 .gs{min-height:18px}
 .gw{min-height:14px;margin-bottom:8px;display:flex;gap:22px;justify-content:center}
-#rst,#btnhome{
+#rst,#btnhome,#goverRanks{
   background:#2a2a44;border:2px solid #a855f7;color:#c084fc;font-family:var(--pixel-font);
   padding:0;border-radius:2px;cursor:pointer;width:226px;height:44px;display:flex;
   align-items:center;justify-content:center;transition:all .2s;
 }
-#rst:hover,#btnhome:hover{background:#3a3a5c;border-color:#c084fc;color:#e9d5ff}
-#rst:active,#btnhome:active{background:#3a3a5c;transform:scale(.98)}
+#rst:hover,#btnhome:hover,#goverRanks:hover{background:#3a3a5c;border-color:#c084fc;color:#e9d5ff}
+#rst:active,#btnhome:active,#goverRanks:active{background:#3a3a5c;transform:scale(.98)}
+
+/* Save Score Dialog */
+#savedlg{
+  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s;z-index:200;
+}
+#savedlg.show{opacity:1;pointer-events:auto}
+.sd-box{
+  background:#1a1a2e;border:3px solid #a855f7;padding:28px 36px 24px;
+  display:flex;flex-direction:column;align-items:center;gap:16px;min-width:340px;
+}
+.sd-box .sd-title{min-height:12px;margin-bottom:2px}
+.sd-score{display:flex;justify-content:center;gap:28px;min-height:20px;margin-bottom:4px}
+.sd-score-line{min-height:16px}
+#savename{
+  width:226px;height:44px;background:#0f0f23;border:2px solid #6b4f91;
+  color:#c084fc;font-family:var(--pixel-font);font-size:14px;text-align:center;
+  padding:0 8px;outline:none;transition:border-color .2s;
+}
+#savename:focus{border-color:#ffcc00}
+#savename::placeholder{font-family:var(--pixel-font);color:#6b4f91;font-size:14px;opacity:1}
+#btnsave,#btnback{
+  width:226px;height:44px;background:#2a2142;border:2px solid #6b4f91;color:var(--pixel-purple);
+  font-family:var(--pixel-font);border-radius:2px;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;transition:all .2s;
+}
+#btnsave:hover{border-color:#c084fc;color:#e9d5ff}
+#btnsave:disabled{opacity:.5;cursor:not-allowed;border-color:#3a3a5c;color:#6b4f91}
+#btnback{background:#2a2142;border:2px solid #6b4f91;color:var(--pixel-purple);font-size:14px}
+#btnback:hover{border-color:#c084fc;color:#e9d5ff}
+#btnback:active{transform:scale(.98)}
+
+/* Easter egg modal */
+#easteregg{
+  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.82);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;z-index:1200;transition:opacity .3s;
+}
+#easteregg.show{opacity:1;pointer-events:auto}
+.egg-box{
+  position:relative;
+  background:linear-gradient(135deg,#1a1628,#12122a);border:2px solid #a855f7;
+  padding:36px 24px 22px;border-radius:4px;display:flex;flex-direction:column;
+  align-items:center;gap:14px;max-width:420px;width:90%;
+  box-shadow:0 0 48px rgba(168,85,247,.25);
+}
+.egg-title{font-size:24px;text-align:center;padding-top:4px}
+.egg-content{
+  font-family:var(--pixel-font);font-size:11px;color:#c0b8d0;line-height:2;
+  text-align:left;padding:0 4px;max-height:340px;overflow-y:auto;
+}
+.egg-content::-webkit-scrollbar{width:4px}
+.egg-content::-webkit-scrollbar-thumb{background:#3a3a5c;border-radius:2px}
+.egg-close{
+  position:absolute;top:10px;right:10px;background:none;border:1px solid #3a3a5c;color:#8888aa;width:30px;height:30px;border-radius:50%;cursor:pointer;font-family:var(--pixel-font);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;z-index:10
+}
+.egg-close:hover{color:#ffcc00;border-color:#ffcc00}
+
+/* Leaf projectile from emoji click */
+.leaf-shot{
+  position:fixed;font-size:20px;z-index:9999;pointer-events:none;
+  transition:all .55s cubic-bezier(.2,.8,.3,1);
+}
+
+/* Step 1: GAME OVER save prompt */
+#gosave{
+  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.82);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s;z-index:105;
+}
+#gosave.show{opacity:1;pointer-events:auto}
+.gsave-box{
+  background:#1a1a2e;border:3px solid #a855f7;padding:34px 38px 30px;
+  display:flex;flex-direction:column;align-items:center;gap:18px;min-width:320px;
+}
+.gsave-rows{display:flex;flex-direction:column;align-items:center;gap:12px}
+.gsave-sub{min-height:12px;text-align:center}
+.gsave-score{min-height:18px}
+.gsave-meta{min-height:14px;display:flex;gap:22px;justify-content:center}
+.gsave-btn{
+  width:200px;height:40px;background:#2a2a44;border:2px solid #a855f7;color:#c084fc;
+  font-family:var(--pixel-font);border-radius:0;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;
+}
+.gsave-btn:hover{transform:scale(1.04);border-color:#ffcc00;color:#ffcc00}
+
+/* Rank line in game over */
+.rank-line{min-height:14px;color:#ffcc00;margin-bottom:2px}
+
+/* Yellow highlight for user's new entry in RANKS */
+#lbtable tr.hl td{color:#ffcc00!important;
+  text-shadow:0 0 8px rgba(255,204,0,.35);font-weight:700}
 
 /* Swap highlight */
 .cell.drag-swap{border-color:#4488ff!important;box-shadow:inset 0 0 0 2px #4488ff;background:#1a2a3a;}
@@ -286,7 +383,11 @@ button{font-family:var(--pixel-font);text-transform:uppercase}
 /* ──────────── Start Screen ──────────── */
 #startscreen{position:fixed;top:0;left:0;right:0;bottom:0;background:#0a0a18;display:flex;align-items:center;justify-content:center;z-index:1000;transition:opacity .4s,transform .4s;}
 #startscreen.hide{opacity:0;pointer-events:none;transform:scale(1.05)}
-.ss-box{width:410px;background:linear-gradient(180deg,#12122a,#0f0f23);border:2px solid #3a3a5c;padding:30px 22px;border-radius:4px;display:flex;flex-direction:column;align-items:center;gap:14px;box-shadow:0 0 40px rgba(168,85,247,.15);}
+.ss-box{width:410px;background:linear-gradient(180deg,#12122a,#0f0f23);border:2px solid #3a3a5c;padding:30px 22px;border-radius:4px;display:flex;flex-direction:column;align-items:center;gap:14px;box-shadow:0 0 40px rgba(168,85,247,.15);position:relative;}
+.sound-btn{position:absolute;bottom:12px;right:12px;width:36px;height:36px;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;}
+.sound-btn svg{width:20px;height:20px;fill:none;stroke:#a855f7;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s;}
+.sound-btn:hover svg{stroke:#c084fc;}
+.sound-btn:active{transform:scale(.95);}
 .ss-title{
   font-family:var(--pixel-font);font-size:30px;font-weight:700;letter-spacing:2px;
   line-height:1.25;text-align:center;text-transform:uppercase;
@@ -306,6 +407,9 @@ button{font-family:var(--pixel-font);text-transform:uppercase}
   100%{background-position:100% 50%}
 }
 .ss-icons{font-size:24px;letter-spacing:4px;display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:center}
+.ss-icons:first-of-type span{cursor:pointer;transition:transform .15s;user-select:none}
+.ss-icons:first-of-type span:hover{transform:scale(1.25)}
+.ss-icons:first-of-type span:active{transform:scale(.9)}
 .ss-div{width:80px;height:1px;background:#3a3a5c}
 .ss-rules{width:fit-content;margin:0 auto;font-size:11px;color:#8888aa;line-height:1.8;padding:0;display:flex;flex-direction:column;gap:2px}
 .ss-rule-line{display:grid;grid-template-columns:68px 1fr;gap:4px;align-items:baseline}
@@ -341,9 +445,10 @@ button{font-family:var(--pixel-font);text-transform:uppercase}
 /* Pause overlay */
 #pauseover{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;z-index:200}
 #pauseover.show{opacity:1;pointer-events:auto}
-.pbox{position:relative;background:#1a1a2e;border:2px solid #7c3aed;padding:36px 44px 28px;display:flex;flex-direction:column;align-items:center;gap:12px;min-width:260px}
+.pbox{position:relative;background:#1a1a2e;border:2px solid #7c3aed;padding:36px 44px 60px;display:flex;flex-direction:column;align-items:center;gap:12px;min-width:260px}
 .ptitle{display:flex;justify-content:center;min-height:21px;margin-bottom:4px}
 .pclose{position:absolute;top:8px;right:10px;background:none;border:none;color:#8888aa;font-family:var(--pixel-font);font-size:17px;cursor:pointer;padding:2px 6px;line-height:1;transition:color .15s}
+.paused-sound-btn{position:absolute;bottom:12px;right:12px}
 .pclose:hover{color:#ffcc00}
 .prst,.pcontinue{background:#2a2a44;border:2px solid #a855f7;color:#c084fc;font-family:var(--pixel-font);font-size:13px;padding:0;border-radius:2px;cursor:pointer;width:100%;height:44px;display:flex;align-items:center;justify-content:center;transition:all .2s}
 .prst:hover,.pcontinue:hover{background:#3a3a5c;border-color:#c084fc;color:#e9d5ff}
@@ -421,7 +526,11 @@ button{font-family:var(--pixel-font);text-transform:uppercase}
       </div>
     </div>
     <button class="menu-btn" id="btnstart" data-pixel="START" data-pixel-class="px-button">START</button>
-    <button class="menu-btn ss-lb-btn" id="btnlb" data-pixel="RECORDS" data-pixel-class="px-button">RECORDS</button>
+    <button class="menu-btn ss-lb-btn" id="btnlb" data-pixel="RANKS" data-pixel-class="px-button">RANKS</button>
+    <button class="sound-btn" id="soundBtn" title="Toggle sound">
+      <svg viewBox="0 0 24 24" class="s-icon-on"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+      <svg viewBox="0 0 24 24" class="s-icon-off" style="display:none"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M22 9l-6 6"/><path d="M16 9l6 6"/></svg>
+    </button>
   </div>
 </div>
 
@@ -429,11 +538,29 @@ button{font-family:var(--pixel-font);text-transform:uppercase}
 <div id="lboverlay">
   <div id="lbdrawer">
     <div class="lb-hd">
-      <span class="lb-hd-title" data-pixel="RECORDS" data-pixel-class="px-purple">RECORDS</span>
+      <span class="lb-hd-title" data-pixel="RANKS" data-pixel-class="px-purple">RANKS</span>
       <button id="lbclose">✕</button>
     </div>
     <table class="lb-table" id="lbtable"><tr><th>#</th><th>玩家</th><th>分数</th><th>时间</th></tr></table>
     <div class="lb-empty" id="lbempty">暂无记录</div>
+  </div>
+</div>
+
+<!-- Easter Egg Modal -->
+<div id="easteregg">
+  <div class="egg-box">
+    <button class="egg-close" id="eggclose">✕</button>
+    <div class="egg-title">🎉</div>
+    <div class="egg-content">
+      恭喜聪明的你发现了这个小彩蛋！<br><br>
+      我依照之前玩过一个休闲小游戏，<br>还原出了这个简单的策略类塔防小游戏<br>
+      游戏没有什么必胜法，<br>多玩玩可以碰上前几关没那么难的概率<br>
+      从策划视角，我能提示的只有——<br>尽可能多收集鲜花，优先合并升级，<br>注意每列排兵布阵<br><br>
+      相信你一定注意到了，<br>这个游戏最大的魅力在于「一步之内的操作」<br>怪兽只在你操作后才会前进，<br>但你需要权衡这一步<br>是先移出工具箱里的花，<br>是合并，又或者是先救火…<br><br>
+      希望你在权衡每一步的决策中，<br>体验到这个小游戏真正的趣味<br><br><br>
+      感谢你愿意玩这个小游戏，<br>如果有反馈的话我会很高兴的！<br><br>
+      :)))))))
+    </div>
   </div>
 </div>
 
@@ -448,13 +575,38 @@ button{font-family:var(--pixel-font);text-transform:uppercase}
 <div id="proj"></div>
 <div id="toast"></div>
 <div id="lvup">LEVEL UP</div>
-<div id="gover"><div class="gb"><div class="gt" data-pixel="GAME OVER" data-pixel-class="px-game-title">GAME OVER</div><div class="gs" id="goScore"></div><div class="gw" id="goWave"></div><button id="rst" data-pixel="RESTART" data-pixel-class="px-pause-button">RESTART</button><button id="btnhome" data-pixel="BACK TO HOME" data-pixel-class="px-pause-button">BACK TO HOME</button></div></div>
+<div id="gover"><div class="gb"><div class="gt" data-pixel="GAME OVER" data-pixel-class="px-game-title">GAME OVER</div><div class="gs" id="goScore"></div><div class="gw" id="goWave"></div><div class="rank-line" id="rankLine" style="display:none"></div><button id="rst" data-pixel="RESTART" data-pixel-class="px-pause-button">RESTART</button><button id="goverRanks" data-pixel="RANKS" data-pixel-class="px-pause-button" style="display:none">RANKS</button><button id="btnhome" data-pixel="BACK TO HOME" data-pixel-class="px-pause-button">BACK TO HOME</button></div></div>
+<div id="gosave">
+  <div class="gsave-box">
+    <div class="gsave-rows">
+      <div class="gt" data-pixel="GAME OVER" data-pixel-class="px-game-title">GAME OVER</div>
+      <div class="gsave-score" id="gsaveScore"></div>
+      <div class="gsave-meta" id="gsaveMeta"></div>
+    </div>
+    <div class="gsave-sub" id="gsaveSub"></div>
+    <button class="gsave-btn gsave-yes" id="gsaveYes" data-pixel="YES" data-pixel-class="px-pause-button">YES</button>
+    <button class="gsave-btn gsave-no" id="gsaveNo" data-pixel="NO" data-pixel-class="px-pause-button">NO</button>
+  </div>
+</div>
+<div id="savedlg">
+  <div class="sd-box">
+    <div class="sd-title" data-pixel="SAVE SCORE" data-pixel-class="px-pause-title">SAVE SCORE</div>
+    <div class="sd-score" id="sdscore"></div>
+    <input type="text" id="savename" placeholder="Your nickname..." maxlength="12">
+    <button id="btnsave" data-pixel="SUBMIT" data-pixel-class="px-pause-button">SUBMIT</button>
+    <button id="btnback" data-pixel="BACK" data-pixel-class="px-pause-button">BACK</button>
+  </div>
+</div>
 <div id="pauseover">
   <div class="pbox">
     <button class="pclose" id="pclose">✕</button>
     <div class="ptitle" data-pixel="PAUSE" data-pixel-class="px-pause-title">PAUSE</div>
     <button class="pcontinue" id="pcontinue" data-pixel="CONTINUE" data-pixel-class="px-pause-button">CONTINUE</button>
     <button class="prst" id="prestart" data-pixel="RESTART" data-pixel-class="px-pause-button">RESTART</button>
+    <button class="sound-btn paused-sound-btn" id="pausedSoundBtn" title="Toggle sound">
+      <svg viewBox="0 0 24 24" class="s-icon-on"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+      <svg viewBox="0 0 24 24" class="s-icon-off" style="display:none"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M22 9l-6 6"/><path d="M16 9l6 6"/></svg>
+    </button>
     <button class="phome" id="phome" data-pixel="BACK TO HOME" data-pixel-class="px-pause-button">BACK TO HOME</button>
   </div>
 </div>
@@ -508,6 +660,172 @@ function cmLv(lv,c,row,kill){
 }
 
 // ============================================================
+// 音效引擎：Web Audio API 合成 8-bit 音效
+const SFX = {
+  _ctx: null,
+  _muted: false,
+  _masterVol: 0.4,
+
+  ctx() {
+    if (!this._ctx) this._ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (this._ctx.state === 'suspended') this._ctx.resume();
+    return this._ctx;
+  },
+
+  vol(raw) { return this._muted ? 0 : raw * this._masterVol; },
+
+  osc(freq, type = 'square') {
+    const o = this.ctx().createOscillator();
+    o.type = type;
+    o.frequency.value = freq;
+    return o;
+  },
+
+  gain(val) {
+    const g = this.ctx().createGain();
+    g.gain.value = val;
+    return g;
+  },
+
+  // === 攻击发射：柔和"咻"叶片飞落 ===
+  attack() {
+    const t = this.ctx().currentTime;
+    const dur = 0.28;
+    const ctx = this.ctx();
+    const bufSize = Math.floor(ctx.sampleRate * dur);
+    const noiseBuf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) d[i] = Math.random() * 2 - 1;
+    const noise = ctx.createBufferSource();
+    noise.buffer = noiseBuf;
+
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.setValueAtTime(1600, t);
+    bp.frequency.exponentialRampToValueAtTime(300, t + dur * 0.7);
+    bp.Q.setValueAtTime(0.4, t);
+
+    const ng = this.gain(this.vol(0.13));
+    ng.gain.setValueAtTime(0, t);
+    ng.gain.linearRampToValueAtTime(this.vol(0.13), t + 0.02);
+    ng.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    noise.connect(bp).connect(ng).connect(ctx.destination);
+    noise.start(t); noise.stop(t + dur);
+
+    const o2 = ctx.createOscillator();
+    o2.type = 'triangle';
+    o2.frequency.setValueAtTime(220, t + dur * 0.65);
+    o2.frequency.exponentialRampToValueAtTime(60, t + dur * 0.65 + 0.06);
+    const g2 = ctx.createGain();
+    g2.gain.setValueAtTime(0, t + dur * 0.6);
+    g2.gain.linearRampToValueAtTime(this.vol(0.05), t + dur * 0.66);
+    g2.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.03);
+    o2.connect(g2).connect(ctx.destination);
+    o2.start(t + dur * 0.6); o2.stop(t + dur + 0.05);
+  },
+
+  // === 合并升级（与放置音效相同） ===
+  merge() {
+    this.place();
+  },
+
+  // === 怪兽消散 ===
+  death() {
+    const t = this.ctx().currentTime;
+    const o = this.osc(300, 'square');
+    const g = this.gain(this.vol(0.05));
+    o.frequency.linearRampToValueAtTime(400, t + 0.02);
+    o.frequency.linearRampToValueAtTime(80, t + 0.25);
+    g.gain.setValueAtTime(this.vol(0.05), t);
+    g.gain.linearRampToValueAtTime(0, t + 0.28);
+    o.connect(g).connect(this.ctx().destination);
+    o.start(t); o.stop(t + 0.3);
+
+    const o2 = this.osc(200, 'triangle');
+    const g2 = this.gain(this.vol(0.03));
+    o2.frequency.linearRampToValueAtTime(50, t + 0.2);
+    g2.gain.linearRampToValueAtTime(0, t + 0.22);
+    o2.connect(g2).connect(this.ctx().destination);
+    o2.start(t); o2.stop(t + 0.25);
+  },
+
+  // === 等级提升 ===
+  lvUp() {
+    const t = this.ctx().currentTime;
+    const notes = [523, 659, 784, 1047, 1319];
+    notes.forEach((freq, i) => {
+      const o = this.osc(freq, 'square');
+      const g = this.gain(this.vol(0.08));
+      const startT = t + i * 0.1;
+      g.gain.setValueAtTime(0, startT);
+      g.gain.linearRampToValueAtTime(this.vol(0.08), startT + 0.02);
+      g.gain.linearRampToValueAtTime(0, startT + 0.13);
+      o.connect(g).connect(this.ctx().destination);
+      o.start(startT); o.stop(startT + 0.15);
+    });
+    const o2 = this.osc(1319, 'triangle');
+    const g2 = this.gain(this.vol(0.05));
+    g2.gain.setValueAtTime(0, t + 0.45);
+    g2.gain.linearRampToValueAtTime(this.vol(0.05), t + 0.47);
+    g2.gain.linearRampToValueAtTime(0, t + 0.7);
+    o2.connect(g2).connect(this.ctx().destination);
+    o2.start(t + 0.45); o2.stop(t + 0.75);
+  },
+
+  // === 放置花朵 ===
+  place() {
+    const t = this.ctx().currentTime;
+    const o = this.osc(660, 'triangle');
+    const g = this.gain(this.vol(0.1));
+    o.frequency.linearRampToValueAtTime(880, t + 0.06);
+    g.gain.linearRampToValueAtTime(0, t + 0.1);
+    o.connect(g).connect(this.ctx().destination);
+    o.start(t); o.stop(t + 0.12);
+
+    const o2 = this.osc(440, 'sine');
+    const g2 = this.gain(this.vol(0.06));
+    g2.gain.linearRampToValueAtTime(0, t + 0.06);
+    o2.connect(g2).connect(this.ctx().destination);
+    o2.start(t); o2.stop(t + 0.08);
+  },
+
+  // === 游戏结束 ===
+  gameOver() {
+    const t = this.ctx().currentTime;
+    const notes = [660, 523, 440, 392, 330, 262, 196, 262];
+    notes.forEach((freq, i) => {
+      const o = this.osc(freq, 'square');
+      const g = this.gain(this.vol(0.1));
+      const delays = [0, 0.28, 0.56, 0.84, 1.12, 1.40, 1.68, 2.07];
+      const startT = t + delays[i];
+      g.gain.setValueAtTime(0, startT);
+      g.gain.linearRampToValueAtTime(this.vol(0.1), startT + 0.02);
+      g.gain.linearRampToValueAtTime(0, startT + 0.3);
+      o.connect(g).connect(this.ctx().destination);
+      o.start(startT); o.stop(startT + 0.32);
+    });
+  }
+};
+
+function loadSoundPref(){
+  try{const v=localStorage.getItem('fd_muted');SFX._muted=v===null?false:v==='1';}catch(e){}
+}
+function saveSoundPref(){
+  try{localStorage.setItem('fd_muted',SFX._muted?'1':'0');}catch(e){}
+}
+function updateSoundIcon(){
+  const elOn=document.querySelectorAll('.s-icon-on');
+  const elOff=document.querySelectorAll('.s-icon-off');
+  elOn.forEach(el=>el.style.display=SFX._muted?'none':'block');
+  elOff.forEach(el=>el.style.display=SFX._muted?'block':'none');
+}
+function toggleSound(){
+  SFX._muted=!SFX._muted;
+  saveSoundPref();
+  updateSoundIcon();
+}
+
+// ============================================================
 let G={
   flowers:[],monsters:[],toolbox:null,score:0,level:1,go:false,
   dying:[],tbSel:false,paused:false,
@@ -527,9 +845,11 @@ function init(){
   G.flowers=[];G.monsters=[];G.toolbox=null;G.score=0;G.level=1;G.go=false;
   G.dying=[];G.tbSel=false;
   G.spawnCount=0; G.turnSinceSpawn=0; G.killCount=0; G.prevLevel=1;
-  // 初始花田只有一朵1级花，位置随机
-  G.flowers.push({r:rand(P_ROWS,P_ROWS+1),c:rand(0,COLS-1),v:1});
-  spawnMonsters(); renderAll();
+  // ★ 先刷怪兽，初始花与第一只怪兽同列，让用户开局势能直观看到攻击效果
+  spawnMonsters();
+  const firstMonCol = G.monsters.length > 0 ? G.monsters[0].col : rand(0, COLS-1);
+  G.flowers.push({r:rand(P_ROWS,P_ROWS+1),c:firstMonCol,v:1});
+  renderAll();
 }
 // ★ 击杀数驱动难度：前3~4击杀简单，之后逐渐加压
 function spawnMonsters(){
@@ -565,6 +885,12 @@ function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=rand(0,
 // ============================================================
 // 分部渲染：只改变化的部分，避免全屏闪动
 const $=id=>document.getElementById(id);
+
+// ===== Supabase 配置（注册后填入你的 URL 和 Key） =====
+const SUPABASE_URL = 'https://sdyulfrslovlzwidmnfq.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_MGyJDwSY96QvqCBrtzbJAg_RcQ5Q_9J';
+let sb = null;
+try { if(SUPABASE_URL.includes('YOUR_')===false) sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) {}
 const PX_FONT={
   A:["01110","10001","10001","11111","10001","10001","10001"],
   B:["11110","10001","10001","11110","10001","10001","11110"],
@@ -599,6 +925,7 @@ const PX_FONT={
   7:["11111","00001","00010","00100","01000","01000","01000"],
   8:["01110","10001","10001","01110","10001","10001","01110"],
   9:["01110","10001","10001","01111","00001","00001","01110"],
+  "?":["00100","01010","00010","00100","00100","00000","00100"],
   ":":["00000","00100","00100","00000","00100","00100","00000"],
   "|":["00100","00100","00100","00100","00100","00100","00100"],
   " ":["00000","00000","00000","00000","00000","00000","00000"]
@@ -622,28 +949,51 @@ function applyStaticPixelText(){
 }
 applyStaticPixelText();
 
-// Leaderboard — localStorage (after $ definition)
-const LB_KEY='flower_td_lb';
-function loadLB(){try{return JSON.parse(localStorage.getItem(LB_KEY)||'[]');}catch(e){return[];}}
-function saveLB(entry){
-  const lb=loadLB();lb.unshift(entry);
-  if(lb.length>20)lb.length=20;
-  localStorage.setItem(LB_KEY,JSON.stringify(lb));
+// Leaderboard — Supabase 优先，本地 localStorage 兜底
+async function fetchLB(){
+  if(!sb){
+    try{return JSON.parse(localStorage.getItem('flower_td_lb')||'[]');}catch(e){return[];}
+  }
+  try{
+    const {data,error}=await sb.from('ranks').select('*').order('score',{ascending:false}).limit(20);
+    if(error)throw error;
+    return data||[];
+  }catch(e){
+    console.warn('Supabase fetch failed, using local',e);
+    try{return JSON.parse(localStorage.getItem('flower_td_lb')||'[]');}catch(x){return[];}
+  }
+}
+async function saveLB(entry){
+  if(!sb){
+    const lb=tryParseLB();lb.unshift(entry);if(lb.length>20)lb.length=20;
+    localStorage.setItem('flower_td_lb',JSON.stringify(lb));
+    renderLB();return;
+  }
+  try{
+    await sb.from('ranks').insert([entry]);
+  }catch(e){
+    const lb=tryParseLB();lb.unshift(entry);if(lb.length>20)lb.length=20;
+    localStorage.setItem('flower_td_lb',JSON.stringify(lb));
+  }
   renderLB();
 }
-function renderLB(){
-  const lb=loadLB();
-  const table=$('lbtable'), empty=$('lbempty');
-  if(!lb.length){table.style.display='none';empty.style.display='';return;}
+function tryParseLB(){try{return JSON.parse(localStorage.getItem('flower_td_lb')||'[]');}catch(e){return[];}}
+async function renderLB(){
+  const lb=await fetchLB();
+  const table=$('lbtable'),empty=$('lbempty');
+  if(!lb.length){table.style.display='none';empty.style.display='';_lbHighlight=null;return;}
   table.style.display='';empty.style.display='none';
-  let rows='<tr><th>#</th><th>玩家</th><th>分数</th><th>时间</th></tr>';
-  lb.forEach((e,i)=>{rows+=`<tr><td>${i+1}</td><td>${e.name}</td><td>${e.score}</td><td>${e.time}</td></tr>`;});
+  let rows='<tr><th>#</th><th>玩家</th><th>分数</th><th>LV</th><th>日期</th></tr>';
+  lb.forEach((e,i)=>{
+    const dt=(e.time||'').split(' ')[0];
+    const isHL=_lbHighlight&&_lbHighlight.nickname===e.nickname&&String(_lbHighlight.score)===String(e.score)&&_lbHighlight.time===dt;
+    rows+=`<tr class="${isHL?'hl':''}"><td>${i+1}</td><td>${e.nickname||e.name||'???'}</td><td>${e.score}</td><td>${e.level||'-'}</td><td>${dt}</td></tr>`;
+  });
   table.innerHTML=rows;
 }
-renderLB();
-function openLB(){
-  renderLB();
+async function openLB(){
   $('lboverlay').classList.add('show');
+  await renderLB();
 }
 function closeLB(){
   $('lboverlay').classList.remove('show');
@@ -821,6 +1171,7 @@ function endDrag(ev){
           G.flowers=G.flowers.filter(f=>f!==a&&f!==b);
           G.flowers.push({r:br,c:bc,v:av},{r:ar,c:ac,v:bv});
         }
+        SFX.place();
         advanceTurn();drag=null;return;
       }
     }else if(drag.targetAction==='move'||drag.targetAction==='place'){
@@ -831,6 +1182,7 @@ function endDrag(ev){
         }else{
           drag.flower.r=tr;drag.flower.c=tc;
         }
+        SFX.place();
         advanceTurn();drag=null;return;
       }
     }
@@ -844,6 +1196,7 @@ function mergeToolbox(target){
   G.flowers=G.flowers.filter(f=>f!==target);
   G.flowers.push({r:target.r,c:target.c,v:nv});
   G.toolbox=null;
+  SFX.merge();
   advanceTurn();
 }
 
@@ -852,6 +1205,7 @@ function merge(a,b){
   const nv=a.v*2;
   G.flowers=G.flowers.filter(f=>f!==a&&f!==b);
   G.flowers.push({r:b.r,c:b.c,v:nv});
+  SFX.merge();
   advanceTurn();
 }
 
@@ -869,6 +1223,7 @@ function tbPlaceAt(r,c){
   G.flowers.push({r,c,v:G.toolbox.v});
   G.toolbox=null;
   G.tbSel=false;
+  SFX.place();
   advanceTurn();
 }
 
@@ -901,9 +1256,10 @@ let pendingTurns=0; // 待处理的回合数，防止lock分支丢失伤害
 
 function advanceTurn(){
   if(!G.monsters.length){
-    // 没有怪兽时：消耗一个排队回合（无怪可打），然后刷怪渲染
-    if(pendingTurns>0) pendingTurns--;
-    spawnMonsters(); renderAll(); return;
+    // 没有怪兽时：先刷怪，若有排队回合则递归调用以应用伤害
+    spawnMonsters(); renderAll();
+    if(pendingTurns>0){pendingTurns--; advanceTurn();}
+    return;
   }
   if(advanceLock){
     // 动画未结束时又有操作：只渲染棋盘（花位已变），排队等动画结束后处理
@@ -940,6 +1296,7 @@ function advanceTurn(){
   function doCleanup(){
     G.dying=[];
     const dead=G.monsters.filter(m=>m.hp<=0);
+    if(dead.length) SFX.death();
     G.killCount+=dead.length;
     // 积分 = 击败怪兽的血量直接累加；收集所有掉落，只取最高级
     let bestDrop=0;
@@ -962,7 +1319,7 @@ function advanceTurn(){
         G.turnSinceSpawn=0;
         const oldLv=G.level;
         spawnMonsters();
-        if(G.level>oldLv)showLvUp();
+        if(G.level>oldLv){SFX.lvUp();showLvUp();}
       }
     }
 
@@ -1043,10 +1400,62 @@ function launchLeaves(data){
 }
 
 // ============================================================
+// Easter Egg sequence state
+const _easterSeq = ['🌷','🌹','🌺','🌸','🌼','🌻','💐','🌿','🪴','🌱','🍀','🌲','🎄','🍁'];
+let _easterIdx = 0;
+function _handleFlowerClick(el){
+  const row = document.querySelector('#startscreen .ss-icons');
+  if(!row) return false;
+  const i = Array.from(row.children).indexOf(el);
+  if(i < 0 || i >= _easterSeq.length) return false;
+
+  // Fire leaf projectile
+  const r = el.getBoundingClientRect();
+  const targetRow = document.querySelector('#startscreen .ss-icons:last-of-type');
+  if(targetRow){
+    const tRect = targetRow.getBoundingClientRect();
+    const leaf = document.createElement('span');
+    leaf.textContent = '🍃';
+    leaf.style.position = 'fixed';
+    leaf.style.zIndex = '9999';
+    leaf.style.pointerEvents = 'none';
+    leaf.style.fontSize = '20px';
+    leaf.style.transition = 'all .55s cubic-bezier(.2,.8,.3,1)';
+    leaf.style.left = (r.left + r.width / 2 - 14) + 'px';
+    leaf.style.top = (r.top + r.height / 2 - 14) + 'px';
+    document.body.appendChild(leaf);
+    requestAnimationFrame(function(){
+      leaf.style.left = (tRect.left + tRect.width / 2 - 14) + 'px';
+      leaf.style.top = (tRect.top + tRect.height / 2 - 14) + 'px';
+      leaf.style.opacity = '0.2';
+      leaf.style.transform = 'scale(0.4) rotate(45deg)';
+    });
+    setTimeout(function(){ if(leaf.parentNode) leaf.remove(); }, 600);
+  }
+
+  // Sequence check
+  if(i === _easterIdx){
+    _easterIdx++;
+    if(_easterIdx === _easterSeq.length){
+      _easterIdx = 0;
+      document.getElementById('easteregg').classList.add('show');
+      var eggContent = document.querySelector('.egg-content');
+      if(eggContent) eggContent.scrollTop = 0;
+    }
+  } else {
+    _easterIdx = 0;
+    if(i === 0) _easterIdx = 1;
+  }
+  return true;
+}
+
 // 事件
 document.addEventListener('mousedown',e=>{
+  // Easter egg: click flower emojis on start screen
+  if(_handleFlowerClick(e.target)) return;
   // Start screen
   if(e.target.closest('#btnstart')){startGame();return;}
+  if(e.target.closest('#soundBtn')||e.target.closest('#pausedSoundBtn')){e.preventDefault();toggleSound();return;}
   // Pause overlay buttons
   if(e.target.closest('#pclose')||e.target.closest('#pcontinue')){resumeGame();return;}
   if(e.target.closest('#prestart')){resumeGame();restartGame();return;}
@@ -1077,8 +1486,17 @@ document.addEventListener('mousemove',e=>{if(drag)moveGhost(e);});
 document.addEventListener('mouseup',e=>{if(drag)endDrag(e);});
 
 document.addEventListener('touchstart',e=>{
+  // Easter egg: click flower emojis on start screen
+  if(e.target.tagName === 'SPAN' && _handleFlowerClick(e.target)) return;
   // Start screen
   if(e.target.closest('#btnstart')){startGame();return;}
+  if(e.target.closest('#soundBtn')||e.target.closest('#pausedSoundBtn')){e.preventDefault();toggleSound();return;}
+  // Game over dialogs (step 1-4)
+  if(e.target.closest('#gsaveYes')){e.preventDefault();$('gsaveYes').click();return;}
+  if(e.target.closest('#gsaveNo')){e.preventDefault();$('gsaveNo').click();return;}
+  if(e.target.closest('#btnback')){e.preventDefault();$('btnback').click();return;}
+  if(e.target.closest('#btnsave')){e.preventDefault();$('btnsave').click();return;}
+  if(e.target.closest('#goverRanks')){e.preventDefault();$('goverRanks').click();return;}
   // Pause overlay buttons
   if(e.target.closest('#pclose')||e.target.closest('#pcontinue')){resumeGame();return;}
   if(e.target.closest('#prestart')){resumeGame();restartGame();return;}
@@ -1125,6 +1543,8 @@ function resumeGame(){
 }
 function backToHome(){
   $('gover').classList.remove('show');
+  $('gosave').classList.remove('show');
+  $('savedlg').classList.remove('show');
   $('startscreen').style.display='';
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     $('startscreen').classList.remove('hide');
@@ -1135,13 +1555,19 @@ function startGame(){
   stopDemo();
   $('startscreen').classList.add('hide');
   $('gover').classList.remove('show');
+  $('gosave').classList.remove('show');
+  $('savedlg').classList.remove('show');
+  _lbHighlight=null;
   setTimeout(()=>{$('startscreen').style.display='none';},400);
   init();
 }
 function restartGame(){
   G.paused=false;
   $('gover').classList.remove('show');
+  $('gosave').classList.remove('show');
+  $('savedlg').classList.remove('show');
   $('pauseover').classList.remove('show');
+  _lbHighlight=null;
   init();
 }
 
@@ -1274,15 +1700,14 @@ function startDemo(){
 
 function endOverlay(){
   if(getComputedStyle($('startscreen')).display==='none'){
-    $('gover').classList.add('show');
+    SFX.gameOver();
     const hi=saveHighest(G.score);
     $('goScore').innerHTML=pxText('SCORE: '+G.score,'px-game-score');
     $('goWave').innerHTML=pxText('LV '+G.level,'px-game-sub')+pxText('HIGHEST: '+hi,'px-game-sub');
-    // Save to leaderboard
-    const pid=getPlayerId();
-    const now=new Date();
-    const t=`${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-    saveLB({name:pid,score:G.score,time:t});
+    $('gsaveScore').innerHTML=pxText('SCORE: '+G.score,'px-go-info');
+    $('gsaveMeta').innerHTML=pxText('LV '+G.level,'px-go-info')+pxText('HIGHEST: '+hi,'px-go-info');
+    $('gsaveSub').innerHTML=pxText('save your score?','px-go-prompt');
+    $('gosave').classList.add('show');
   }
 }
 const HI_KEY='flower_td_hi';
@@ -1292,11 +1717,72 @@ function saveHighest(score){
   if(score>cur)localStorage.setItem(HI_KEY,String(score));
   return Math.max(score,cur);
 }
-function getPlayerId(){
-  let pid=localStorage.getItem('flower_td_pid');
-  if(!pid){pid='P'+String(Math.floor(Math.random()*9000)+1000);localStorage.setItem('flower_td_pid',pid);}
-  return pid;
+
+let _lbHighlight=null;
+
+function showGoverSummary(rankInfo,showRanks=true){
+  const hi=saveHighest(G.score);
+  $('goScore').innerHTML=pxText('SCORE: '+G.score,'px-game-score');
+  $('goWave').innerHTML=pxText('LV '+G.level,'px-game-sub')+pxText('HIGHEST: '+hi,'px-game-sub');
+  if(rankInfo){
+    $('rankLine').style.display='';
+    $('rankLine').innerHTML=pxText(rankInfo,'px-rank');
+  }else{
+    $('rankLine').style.display='none';
+  }
+  $('goverRanks').style.display=showRanks?'':'none';
+  $('gover').classList.add('show');
 }
+
+// Step 1 → YES: show save dialog
+$('gsaveYes').addEventListener('click',()=>{
+  $('gosave').classList.remove('show');
+  $('sdscore').innerHTML=
+    '<div class="sd-score-line">'+pxText('LV '+G.level,'px-game-score')+'</div>'+
+    '<div class="sd-score-line">'+pxText('Score: '+G.score,'px-game-score')+'</div>';
+  $('savedlg').classList.add('show');
+  $('savename').value='';
+  $('btnsave').disabled=false;
+});
+// Step 1 → NO: show game over summary
+$('gsaveNo').addEventListener('click',()=>{
+  $('gosave').classList.remove('show');
+  _lbHighlight=null;
+  showGoverSummary(null,false);
+});
+// Step 3 → BACK: back to step 1
+$('btnback').addEventListener('click',()=>{
+  $('savedlg').classList.remove('show');
+  $('gosave').classList.add('show');
+});
+// Step 3 → SUBMIT: save + show rank (show immediately, resolve rank in background)
+$('btnsave').addEventListener('click',async()=>{
+  if($('btnsave').disabled) return;
+  const name=$('savename').value.trim();
+  if(!name){toast('PLEASE ENTER A NICKNAME');$('savename').focus();return;}
+  $('btnsave').disabled=true;
+  const now=new Date();
+  const t=`${now.getMonth()+1}/${now.getDate()}`;
+
+  // Show summary immediately with placeholder rank
+  $('savedlg').classList.remove('show');
+  showGoverSummary('YOUR RANK: #...');
+
+  // Fire-and-forget save, query rank in parallel
+  saveLB({nickname:name,score:G.score,level:G.level,time:t});
+  _lbHighlight={nickname:name,score:G.score,time:t};
+
+  let rank='?';
+  if(sb){
+    try{
+      const {count,error}=await sb.from('ranks').select('*',{count:'exact',head:true}).gt('score',G.score);
+      if(!error&&count!==null) rank=count+1;
+    }catch(e){}
+  }
+  $('rankLine').innerHTML=pxText('YOUR RANK: #'+rank,'px-rank');
+});
+// Step 4 → RANKS button in game over
+$('goverRanks').addEventListener('click',()=>{openLB();});
 
 let tid;
 function toast(msg){
@@ -1307,7 +1793,14 @@ function toast(msg){
 
 // ============================================================
 // Don't auto-start the game; wait for START button
+loadSoundPref();
+updateSoundIcon();
 startDemo();
+
+// Easter egg close button
+document.getElementById('eggclose').addEventListener('click', function(){
+  document.getElementById('easteregg').classList.remove('show');
+});
 </script>
 </body>
 </html>
