@@ -1400,17 +1400,20 @@ function launchLeaves(data){
 }
 
 // ============================================================
-// Easter Egg sequence state
-const _easterSeq = ['🌷','🌹','🌺','🌸','🌼','🌻','💐','🌿','🪴','🌱','🍀','🌲','🎄','🍁'];
-let _easterIdx = 0;
+// Easter Egg: any 5 consecutive flower clicks trigger the egg
+let _easterCount = 0;
+const _EASTER_TARGET = 5;
+let _easterDebounce = 0;
 function _handleFlowerClick(el){
-  const row = document.querySelector('#startscreen .ss-icons');
-  if(!row) return false;
-  const i = Array.from(row.children).indexOf(el);
-  if(i < 0 || i >= _easterSeq.length) return false;
+  // Debounce: prevent touch + mouse double-fire on mobile
+  const now = Date.now();
+  if(now - _easterDebounce < 300) return false;
+  _easterDebounce = now;
+  const span = el.closest('.ss-icons:first-of-type span');
+  if(!span) return false;
 
   // Fire leaf projectile
-  const r = el.getBoundingClientRect();
+  const r = span.getBoundingClientRect();
   const targetRow = document.querySelector('#startscreen .ss-icons:last-of-type');
   if(targetRow){
     const tRect = targetRow.getBoundingClientRect();
@@ -1433,26 +1436,22 @@ function _handleFlowerClick(el){
     setTimeout(function(){ if(leaf.parentNode) leaf.remove(); }, 600);
   }
 
-  // Sequence check
-  if(i === _easterIdx){
-    _easterIdx++;
-    if(_easterIdx === _easterSeq.length){
-      _easterIdx = 0;
-      document.getElementById('easteregg').classList.add('show');
-      var eggContent = document.querySelector('.egg-content');
-      if(eggContent) eggContent.scrollTop = 0;
-    }
-  } else {
-    _easterIdx = 0;
-    if(i === 0) _easterIdx = 1;
+  _easterCount++;
+  if(_easterCount >= _EASTER_TARGET){
+    _easterCount = 0;
+    document.getElementById('easteregg').classList.add('show');
+    var eggContent = document.querySelector('.egg-content');
+    if(eggContent) eggContent.scrollTop = 0;
   }
   return true;
 }
+function _resetEasterCount(){ _easterCount = 0; }
 
 // 事件
 document.addEventListener('mousedown',e=>{
   // Easter egg: click flower emojis on start screen
   if(_handleFlowerClick(e.target)) return;
+  _resetEasterCount();
   // Start screen
   if(e.target.closest('#btnstart')){startGame();return;}
   if(e.target.closest('#soundBtn')||e.target.closest('#pausedSoundBtn')){e.preventDefault();toggleSound();return;}
@@ -1487,7 +1486,8 @@ document.addEventListener('mouseup',e=>{if(drag)endDrag(e);});
 
 document.addEventListener('touchstart',e=>{
   // Easter egg: click flower emojis on start screen
-  if(e.target.tagName === 'SPAN' && _handleFlowerClick(e.target)) return;
+  if(_handleFlowerClick(e.target)){e.preventDefault();return;}
+  _resetEasterCount();
   // Start screen
   if(e.target.closest('#btnstart')){startGame();return;}
   if(e.target.closest('#soundBtn')||e.target.closest('#pausedSoundBtn')){e.preventDefault();toggleSound();return;}
